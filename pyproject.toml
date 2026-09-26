@@ -31,8 +31,8 @@ makemigrations = "python manage.py makemigrations leefanniv"
 migrate = "python manage.py migrate --noinput"
 runserver = "python manage.py runserver"
 # Production entry point, used by the systemd unit (deploy/leefanniv.service).
-# LEEFANNIV_BIND comes from its env file.
-serve = { cmd = "gunicorn leefanniv.wsgi --workers 2 --bind $LEEFANNIV_BIND", depends-on = ["migrate"] }
+# LEEFANNIV_HOST and LEEFANNIV_PORT come from its env file.
+serve = { cmd = "gunicorn leefanniv.wsgi --workers 2 --bind $LEEFANNIV_HOST:$LEEFANNIV_PORT", depends-on = ["migrate"] }
 
 [tool.pixi.feature.dev.dependencies]
 ruff = "*"

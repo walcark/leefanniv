@@ -52,10 +52,13 @@ TEMPLATES = [
     },
 ]
 
+DB_PATH = Path(os.environ.get("LEEFANNIV_DB", BASE_DIR / "db.sqlite3"))
+# SQLite creates the file but not its directory.
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get("LEEFANNIV_DB", BASE_DIR / "db.sqlite3"),
+        "NAME": DB_PATH,
     }
 }
 
