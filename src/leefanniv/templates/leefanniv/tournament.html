@@ -8,6 +8,7 @@
   .tabs { display:inline-flex; background:var(--card); border-radius:999px; padding:4px; box-shadow:var(--shadow); }
   .tabs a { text-decoration:none; font-weight:800; padding:.45rem .95rem; border-radius:999px; color:var(--muted); white-space:nowrap; }
   .tabs a.on { background:var(--pink); color:#fff; }
+  @media (max-width:480px) { .tabs a { padding:.4rem .55rem; font-size:.85rem; } }
   .teams { display:grid; gap:.7rem; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); margin-top:1rem; }
   .team { border-radius:18px; padding:.8rem; background:color-mix(in srgb, var(--team) 18%, var(--card));
     border:2px solid color-mix(in srgb, var(--team) 55%, var(--card)); }

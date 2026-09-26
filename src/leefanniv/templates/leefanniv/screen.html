@@ -8,16 +8,16 @@
   .sh .title span { background:linear-gradient(90deg,var(--pink),var(--lilac),var(--blue));
     -webkit-background-clip:text; background-clip:text; color:transparent; }
   .sh .meta { font-size:clamp(1rem, 1.4vw, 1.8rem); font-weight:800; color:var(--muted); }
-  .cols { display:grid; grid-template-columns:minmax(0, .75fr) minmax(0, 1.9fr) minmax(0, 1fr); gap:1.6vw; align-items:start; }
-  .ggrid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:.7vw; }
-  .gcard { display:grid; justify-items:center; align-content:center; gap:.2vw; padding:1vw .5vw; border-radius:1.3vw;
+  .cols { display:grid; grid-template-columns:minmax(0, .95fr) minmax(0, 1.9fr) minmax(0, 1fr); gap:1.6vw; align-items:start; }
+  .ggrid { display:flex; flex-wrap:wrap; gap:.7vw; }
+  .gcard { display:grid; justify-items:center; align-content:center; gap:.1vw; padding:.7vw .8vw; flex:1 1 auto; min-width:7vw; max-width:100%; border-radius:1.3vw;
     text-align:center; background:var(--pink-soft); font-weight:800; }
   .gcard:nth-child(5n+2) { background:color-mix(in srgb, var(--blue) 35%, var(--card)); }
   .gcard:nth-child(5n+3) { background:color-mix(in srgb, var(--mint) 40%, var(--card)); }
   .gcard:nth-child(5n+4) { background:color-mix(in srgb, var(--lemon) 45%, var(--card)); }
   .gcard:nth-child(5n+5) { background:color-mix(in srgb, var(--lilac) 40%, var(--card)); }
-  .gcard .ge { font-size:clamp(1.8rem, 2.8vw, 3.8rem); line-height:1.1; }
-  .gcard strong { font-size:clamp(.95rem, 1.2vw, 1.7rem); line-height:1.2; }
+  .gcard .ge { font-size:clamp(1.5rem, 2.2vw, 3rem); line-height:1.1; }
+  .gcard strong { font-size:clamp(.95rem, 1.2vw, 1.7rem); line-height:1.2; overflow-wrap:anywhere; }
   .gcard small { color:var(--muted); font-size:clamp(.75rem, .85vw, 1.2rem); }
   .card { border-radius:2vw; padding:1.6vw; }
   h2 { font-size:clamp(1.2rem, 1.9vw, 2.6rem); margin-bottom:1.2vw; }

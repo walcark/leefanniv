@@ -1,5 +1,5 @@
 <style>
-  .play { display:grid; gap:1rem; grid-template-columns:260px minmax(0, 1fr) 340px; align-items:start; }
+  .play { display:grid; gap:1rem; grid-template-columns:300px minmax(0, 1fr) 340px; align-items:start; }
   .p-games, .p-rank { position:sticky; top:4.5rem; }
   .play > section { scroll-margin-top:4.5rem; }
   .tabbar { display:none; }
@@ -18,10 +18,12 @@
   }
 
   /* Games */
-  .ggrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(104px, 1fr)); gap:.55rem; margin-bottom:1rem; }
-  .gwrap { position:relative; }
+  /* Tiles take their name's width, grow to fill the row, and wrap the name
+     only when it is wider than the whole column. */
+  .ggrid { display:flex; flex-wrap:wrap; gap:.55rem; margin-bottom:1rem; }
+  .gwrap { position:relative; flex:1 1 auto; min-width:104px; max-width:100%; }
   .gwrap > input { display:none; }
-  .gcard { display:grid; justify-items:center; gap:.15rem; padding:.8rem .4rem; border-radius:18px; height:100%;
+  .gcard { display:grid; justify-items:center; gap:.15rem; padding:.8rem .7rem; border-radius:18px; height:100%;
     text-align:center; background:var(--pink-soft); cursor:pointer; border:3px solid transparent; transition:transform .1s; }
   .gwrap:nth-child(5n+2) .gcard { background:color-mix(in srgb, var(--blue) 35%, var(--card)); }
   .gwrap:nth-child(5n+3) .gcard { background:color-mix(in srgb, var(--mint) 40%, var(--card)); }
@@ -39,7 +41,7 @@
   .picked.on { border:2px solid var(--pink); background:var(--pink-soft); color:var(--ink); }
   .picked .change { margin-left:auto; font-size:.85rem; color:var(--pink); }
   @media (min-width:1000px) { .picked { cursor:default; } .picked .change { display:none; } }
-  .gcard .ge { font-size:2rem; } .gcard strong { font-size:.95rem; line-height:1.2; }
+  .gcard .ge { font-size:2rem; } .gcard strong { font-size:.95rem; line-height:1.2; overflow-wrap:anywhere; }
   .gcard small { color:var(--muted); font-weight:700; font-size:.75rem; }
   .row.addgame > input[type=text] { min-width:0; }
   .row.addgame > input[name=emoji] { width:3.4rem; text-align:center; flex:none; }
