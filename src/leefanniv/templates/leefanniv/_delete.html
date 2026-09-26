@@ -1,0 +1,8 @@
+<div class="card" style="max-width:640px; border:2px solid color-mix(in srgb, var(--loss) 40%, var(--card))">
+  <h2>🗑️ Supprimer la compétition</h2>
+  <p class="muted">Efface « {{ t.name }} » avec ses équipes, ses joueurs et tous ses matchs. Les jeux restent disponibles pour les autres compétitions.</p>
+  <form method="post" onsubmit="return confirm('Supprimer définitivement « {{ t.name|escapejs }} » et tous ses matchs ?')">{% csrf_token %}
+    <input type="hidden" name="action" value="delete_tournament">
+    <button class="btn" style="background:var(--loss); box-shadow:none">Supprimer la compétition</button>
+  </form>
+</div>

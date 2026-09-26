@@ -56,6 +56,10 @@ def tournament(request: HttpRequest, pk: int, tab: str = "play") -> HttpResponse
     posted = request.POST if request.method == "POST" else None
     charter = CharterForm(posted if tab == "charter" else None, instance=t)
     if request.method == "POST":
+        if request.POST.get("action") == "delete_tournament":
+            t.remove()
+            messages.success(request, f"Compétition « {t.name} » supprimée.")
+            return redirect("tournaments")
         if tab == "charter":
             if charter.is_valid():
                 charter.save()

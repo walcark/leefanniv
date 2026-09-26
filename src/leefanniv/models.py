@@ -79,6 +79,17 @@ class Tournament(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def remove(self) -> None:
+        """Delete the tournament with its matches, bracket, teams and players.
+
+        Results and bracket slots protect the players and teams they name, so
+        they go first; the rest follows by cascade.
+        """
+        with transaction.atomic():
+            self.matches.all().delete()
+            self.bracket.all().delete()
+            self.delete()
+
     def points(self, outcome: str) -> Decimal:
         """Return the points one engaged player earns for *outcome*."""
         return {

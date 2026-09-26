@@ -106,3 +106,17 @@ def test_screen_live_block_is_stable_between_polls(client):
             t.start_bracket()
         first, second = (client.get(f"/t/{t.pk}/ecran/").content for _ in range(2))
         assert first == second and b"csrfmiddlewaretoken" not in first
+
+
+@pytest.mark.django_db
+def test_delete_tournament_frees_its_games(client):
+    t = Tournament.objects.create(name="Test", kind="bracket")
+    red, blue = t.teams.create(name="Rouge"), t.teams.create(name="Bleu")
+    a, c = red.players.create(name="A"), blue.players.create(name="C")
+    g = Game.objects.create(name="JEU1")
+    t.record_match(g, {red: [a], blue: [c]}, red)
+    t.start_bracket()
+    t.bracket.first().set_winner(red)
+    client.post(f"/t/{t.pk}/equipes/", {"action": "delete_tournament"})
+    assert not Tournament.objects.exists() and not Match.objects.exists()
+    assert not g.match_set.exists()

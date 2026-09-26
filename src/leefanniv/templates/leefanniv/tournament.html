@@ -30,8 +30,8 @@
     {% if t.kind == 'points' %}<a href="{% url 'charter' t.pk %}" {% if tab == 'charter' %}class="on"{% endif %}>📜 Charte</a>{% endif %}
   </nav>
 </div>
-{% if tab == 'teams' %}{% include "leefanniv/_teams.html" %}
-{% elif tab == 'charter' %}{% include "leefanniv/_charter.html" %}
+{% if tab == 'teams' %}{% include "leefanniv/_teams.html" %}{% if t.kind == 'bracket' %}{% include "leefanniv/_delete.html" %}{% endif %}
+{% elif tab == 'charter' %}{% include "leefanniv/_charter.html" %}{% include "leefanniv/_delete.html" %}
 {% elif t.kind == 'bracket' %}{% include "leefanniv/_bracket.html" %}
 {% else %}{% include "leefanniv/_play.html" %}{% endif %}
 {% endblock %}
