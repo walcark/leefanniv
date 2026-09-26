@@ -1,0 +1,25 @@
+{% extends "leefanniv/base.html" %}
+{% block title %}Jeux{% endblock %}
+{% block content %}
+<h1>Jeux</h1>
+<div class="card">
+  <h2>Ajouter un jeu</h2>
+  <form method="post" class="row">{% csrf_token %}
+    <input type="text" name="name" placeholder="Nom du jeu" required>
+    <label>V <input type="number" name="win_points" value="3" style="width:4.5rem"></label>
+    <label>N <input type="number" name="draw_points" value="1" style="width:4.5rem"></label>
+    <label>D <input type="number" name="loss_points" value="0" style="width:4.5rem"></label>
+    <button>Ajouter</button>
+  </form>
+  {{ form.errors }}
+</div>
+<div class="card">
+  <table>
+    <tr><th>Jeu</th><th class="num">Victoire</th><th class="num">Égalité</th><th class="num">Défaite</th></tr>
+    {% for g in games %}
+      <tr><td>{{ g.name }}</td><td class="num">{{ g.win_points }}</td>
+          <td class="num">{{ g.draw_points }}</td><td class="num">{{ g.loss_points }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="muted">Aucun jeu.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endblock %}

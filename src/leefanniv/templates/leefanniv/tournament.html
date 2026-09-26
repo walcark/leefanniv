@@ -1,0 +1,118 @@
+{% extends "leefanniv/base.html" %}
+{% block title %}{{ t.name }}{% endblock %}
+{% block content %}
+<style>
+  .layout { display:grid; gap:1rem; }
+  @media (min-width: 800px) { .layout { grid-template-columns: 1fr 360px; align-items:start; }
+                              .side { position:sticky; top:1rem; } }
+  @media (max-width: 799px) { .side { order:-1; } }
+  .podium li { display:flex; align-items:center; gap:.75rem; padding:.55rem 0;
+               border-bottom:1px solid var(--line); list-style:none; }
+  .podium { padding:0; margin:0; }
+  .rank { width:2rem; height:2rem; border-radius:50%; display:grid; place-items:center;
+          font-weight:800; background:var(--line); flex:none; }
+  .r1 .rank { background:var(--gold); color:#000; } .r2 .rank { background:var(--silver); color:#000; }
+  .r3 .rank { background:var(--bronze); color:#000; }
+  .r1 .tname { font-size:1.15rem; font-weight:700; }
+  .tname { flex:1; } .pts { font-size:1.3rem; font-weight:800; font-variant-numeric:tabular-nums; }
+  .wdl { font-size:.8rem; color:var(--muted); }
+  .pick { display:flex; align-items:center; gap:.5rem; padding:.3rem 0; }
+  .pick .who { flex:1; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .seg input { display:none; }
+  .seg label { padding:.35rem .6rem; cursor:pointer; font-weight:600; font-size:.9rem; }
+  .seg input:checked + label { background:var(--muted); color:#fff; }
+  .seg input[value=W]:checked + label { background:var(--win); }
+  .seg input[value=D]:checked + label { background:var(--draw); }
+  .seg input[value=L]:checked + label { background:var(--loss); }
+  .team-title { margin:.75rem 0 .25rem; font-weight:700; color:var(--accent); }
+  .o-W { color:var(--win); } .o-D { color:var(--draw); } .o-L { color:var(--loss); }
+</style>
+
+<form method="get" onchange="location='/t/'+this.t.value+'/'" style="margin-bottom:.5rem">
+  <select name="t">{% for x in tournaments %}
+    <option value="{{ x.pk }}" {% if x.pk == t.pk %}selected{% endif %}>{{ x.name }}</option>{% endfor %}
+  </select>
+</form>
+<h1>{{ t.name }}</h1>
+
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Enregistrer un match</h2>
+      {% if not games %}<p class="muted">Ajoute d'abord des <a href="{% url 'games' %}">jeux</a>.</p>
+      {% elif not teams %}<p class="muted">Ajoute d'abord des équipes et des joueurs.</p>
+      {% else %}
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="action" value="match">
+        <select name="game" required>
+          <option value="">Jeu…</option>
+          {% for g in games %}<option value="{{ g.pk }}">{{ g.name }} ({{ g.win_points }}/{{ g.draw_points }}/{{ g.loss_points }})</option>{% endfor %}
+        </select>
+        {% for team in teams %}
+          <div class="team-title">{{ team.name }}</div>
+          {% for p in team.players.all %}
+            <div class="pick"><span class="who">{{ p.name }}</span>
+              <span class="seg">
+                <input type="radio" name="p{{ p.pk }}" id="p{{ p.pk }}x" value="" checked><label for="p{{ p.pk }}x">–</label>
+                <input type="radio" name="p{{ p.pk }}" id="p{{ p.pk }}W" value="W"><label for="p{{ p.pk }}W">V</label>
+                <input type="radio" name="p{{ p.pk }}" id="p{{ p.pk }}D" value="D"><label for="p{{ p.pk }}D">N</label>
+                <input type="radio" name="p{{ p.pk }}" id="p{{ p.pk }}L" value="L"><label for="p{{ p.pk }}L">D</label>
+              </span></div>
+          {% empty %}<p class="muted">Pas encore de joueur.</p>{% endfor %}
+        {% endfor %}
+        <p><button>Enregistrer</button></p>
+      </form>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Équipes</h2>
+      <form method="post" class="row">{% csrf_token %}
+        <input type="hidden" name="action" value="team">
+        <input type="text" name="name" placeholder="Nouvelle équipe" required>
+        <button>Ajouter</button>
+      </form>
+      {% if teams %}
+      <form method="post" class="row" style="margin-top:.5rem">{% csrf_token %}
+        <input type="hidden" name="action" value="player">
+        <input type="text" name="name" placeholder="Nouveau joueur" required>
+        <select name="team">{% for team in teams %}<option value="{{ team.pk }}">{{ team.name }}</option>{% endfor %}</select>
+        <button>Ajouter</button>
+      </form>
+      {% for team in teams %}
+        <p><strong>{{ team.name }}</strong> :
+          {% for p in team.players.all %}{{ p.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="muted">aucun joueur</span>{% endfor %}</p>
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Derniers matchs</h2>
+      {% for m in matches %}
+        <div class="pick">
+          <span class="who"><strong>{{ m.game }}</strong> <span class="muted">{{ m.played_at|date:"H:i" }}</span><br>
+            {% for r in m.results.all %}<span class="o-{{ r.outcome }}">{{ r.player.name }} ({{ r.get_outcome_display|first }})</span>{% if not forloop.last %} · {% endif %}{% endfor %}</span>
+          <form method="post" onsubmit="return confirm('Supprimer ce match ?')">{% csrf_token %}
+            <input type="hidden" name="action" value="delete_match"><input type="hidden" name="match" value="{{ m.pk }}">
+            <button class="ghost" title="Supprimer">✕</button></form>
+        </div>
+      {% empty %}<p class="muted">Aucun match joué.</p>{% endfor %}
+    </div>
+  </div>
+
+  <aside class="side card">
+    <h2>Classement</h2>
+    <ol class="podium">
+      {% for row in ranking %}
+        <li class="r{{ forloop.counter }}">
+          <span class="rank">{{ forloop.counter }}</span>
+          <span class="tname">{{ row.team.name }}<br>
+            <span class="wdl">{{ row.played }} matchs · {{ row.W }}V {{ row.D }}N {{ row.L }}D</span></span>
+          <span class="pts">{{ row.points }}</span>
+        </li>
+      {% empty %}<li class="muted">Pas encore d'équipe.</li>{% endfor %}
+    </ol>
+  </aside>
+</div>
+{% endblock %}

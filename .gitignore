@@ -1,0 +1,5 @@
+.pixi/*
+!.pixi/config.toml
+*.sqlite3
+__pycache__/
+.*_cache/

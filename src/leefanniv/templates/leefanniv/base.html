@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Leefanniv{% endblock %}</title>
+<style>
+  :root { --bg:#f6f5f2; --card:#fff; --fg:#1d1d1f; --muted:#6b6b70; --line:#e3e1dc;
+          --accent:#e8590c; --gold:#f2b705; --silver:#a8b0b8; --bronze:#c47a3a;
+          --win:#2b8a3e; --draw:#868e96; --loss:#c92a2a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#141416; --card:#1e1e22; --fg:#ececef; --muted:#9a9aa2; --line:#2e2e34; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+         font:16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display:flex; gap:1rem; align-items:center; flex-wrap:wrap;
+           padding:.75rem 1rem; border-bottom:1px solid var(--line); background:var(--card); }
+  header .brand { font-weight:800; color:var(--accent); text-decoration:none; font-size:1.2rem; }
+  header nav { display:flex; gap:.75rem; margin-left:auto; }
+  a { color:var(--accent); }
+  main { max-width:1100px; margin:0 auto; padding:1rem; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
+          padding:1rem; margin-bottom:1rem; }
+  h1 { margin:.2rem 0 1rem; } h2 { margin:0 0 .75rem; font-size:1.1rem; }
+  input, select, button { font:inherit; padding:.5rem .6rem; border-radius:8px;
+          border:1px solid var(--line); background:var(--bg); color:var(--fg); }
+  button { background:var(--accent); color:#fff; border:0; cursor:pointer; font-weight:600; }
+  button.ghost { background:none; color:var(--muted); padding:.2rem .4rem; }
+  form.row { display:flex; gap:.5rem; flex-wrap:wrap; }
+  form.row input[type=text] { flex:1; min-width:8rem; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:.4rem .3rem; text-align:left; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; font-size:.85rem; }
+  .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .muted { color:var(--muted); font-size:.9rem; }
+  .msg { padding:.6rem 1rem; border-radius:8px; margin-bottom:1rem; background:var(--card);
+         border-left:4px solid var(--accent); }
+  .msg.error { border-color:var(--loss); } .msg.success { border-color:var(--win); }
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="{% url 'home' %}">🏆 Leefanniv</a>
+  <nav><a href="{% url 'tournaments' %}">Tournois</a><a href="{% url 'games' %}">Jeux</a></nav>
+</header>
+<main>
+  {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

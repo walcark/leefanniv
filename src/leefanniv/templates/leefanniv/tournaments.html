@@ -1,0 +1,19 @@
+{% extends "leefanniv/base.html" %}
+{% block title %}Tournois{% endblock %}
+{% block content %}
+<h1>Tournois</h1>
+<div class="card">
+  <h2>Nouveau tournoi</h2>
+  <form method="post" class="row">{% csrf_token %}
+    <input type="text" name="name" placeholder="Nom du tournoi" required>
+    <button>Créer</button>
+  </form>
+  {{ form.errors }}
+</div>
+<div class="card">
+  {% for t in tournaments %}
+    <p><a href="{% url 'tournament' t.pk %}">{{ t.name }}</a>
+       <span class="muted">· {{ t.created|date:"d/m/Y" }}</span></p>
+  {% empty %}<p class="muted">Aucun tournoi pour l'instant.</p>{% endfor %}
+</div>
+{% endblock %}
