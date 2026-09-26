@@ -87,7 +87,7 @@ def tournament(request: HttpRequest, pk: int, tab: str = "play") -> HttpResponse
         ),
         "picked_game": request.GET.get("game", ""),
         "examples": [
-            (n, t.win_points * n, t.draw_points * n, t.loss_points * n)
+            (n, t.win_points * 2 * n, t.draw_points * 2 * n, t.loss_points * 2 * n)
             for n in (1, 2, 3)
         ],
         "match_count": t.matches.count(),
@@ -176,12 +176,12 @@ def _record_match(request: HttpRequest, t: Tournament) -> str:
     except ValueError as exc:
         messages.error(request, str(exc))
         return back
-    size = len(next(iter(lineups.values())))
+    engaged = sum(len(players) for players in lineups.values())
     if winner is None:
-        gain = floatformat(t.draw_points * size, -1)
+        gain = floatformat(t.draw_points * engaged, -1)
         messages.success(request, f"{game.emoji} {game} : égalité, +{gain} par équipe")
     else:
-        gain = floatformat(t.win_points * size, -1)
+        gain = floatformat(t.win_points * engaged, -1)
         messages.success(request, f"{game.emoji} {game} : {winner} gagne, +{gain}")
     return f"{request.path}?game={game.pk}#match"
 

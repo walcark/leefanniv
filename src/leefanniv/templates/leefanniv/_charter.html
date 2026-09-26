@@ -15,13 +15,13 @@
 </style>
 <div class="card charter">
   <h2>📜 Charte du tournoi</h2>
-  <p class="sub">Chaque joueur engagé dans un match rapporte ces points à son équipe. Les équipes s'affrontent avec le même nombre de joueurs.</p>
+  <p class="sub">Un match vaut ces points multipliés par le nombre total de joueurs engagés dans la partie, toutes équipes confondues. Chaque équipe marque ce total selon son résultat, et chacun de ses joueurs engagés aussi pour le classement individuel.</p>
   <form method="post">{% csrf_token %}
     <label class="field">Nom du tournoi {{ charter.name }}</label>
     <div class="scale">
-      <label class="W">🏆 Victoire {{ charter.win_points }}<small>par joueur</small></label>
-      <label class="D">🤝 Égalité {{ charter.draw_points }}<small>par joueur</small></label>
-      <label class="L">😢 Défaite {{ charter.loss_points }}<small>par joueur</small></label>
+      <label class="W">🏆 Victoire {{ charter.win_points }}<small>× joueurs engagés</small></label>
+      <label class="D">🤝 Égalité {{ charter.draw_points }}<small>× joueurs engagés</small></label>
+      <label class="L">😢 Défaite {{ charter.loss_points }}<small>× joueurs engagés</small></label>
     </div>
     {{ charter.non_field_errors }}{{ charter.win_points.errors }}{{ charter.draw_points.errors }}{{ charter.loss_points.errors }}
     <button class="btn block">Enregistrer la charte</button>
@@ -32,7 +32,7 @@
   <table class="ex">
     <tr><th>Format</th><th>Victoire</th><th>Égalité</th><th>Défaite</th></tr>
     {% for n, w, d, l in examples %}
-      <tr><td>{{ n }} contre {{ n }}</td><td>+{{ w|floatformat:"-1" }}</td><td>+{{ d|floatformat:"-1" }}</td><td>{{ l|floatformat:"-1" }}</td></tr>
+      <tr><td>{{ n }} contre {{ n }} <span class="muted">({{ n|add:n }} joueurs)</span></td><td>+{{ w|floatformat:"-1" }}</td><td>+{{ d|floatformat:"-1" }}</td><td>{{ l|floatformat:"-1" }}</td></tr>
     {% endfor %}
   </table>
   <p class="muted">Modifier la charte recalcule aussi les matchs déjà joués.</p>

@@ -3,8 +3,9 @@
 A tournament is either a points competition or a knockout bracket.
 
 In a points competition, a match pits teams against each other, each engaging
-the same number of players. Every engaged player earns the points the
-tournament's charter sets for their team's outcome, and so does their team.
+the same number of players. A team earns the charter's rate for its outcome
+times the number of players engaged in the whole match, and each of its engaged
+players is credited with that same gain.
 Points are read from the charter at ranking time, so editing it re-scores past
 matches too.
 
@@ -15,6 +16,7 @@ rounds start empty and are filled as winners are picked.
 from __future__ import annotations
 
 import random
+from collections import Counter
 from decimal import Decimal
 from typing import Any
 
@@ -62,7 +64,7 @@ class Tournament(models.Model):
         "type", max_length=10, choices=Kind.choices, default=Kind.POINTS
     )
     created = models.DateTimeField(auto_now_add=True)
-    # The charter: points earned by each engaged player, per outcome.
+    # The charter: per outcome, points per player engaged in the whole match.
     win_points = models.DecimalField(
         "victoire", max_digits=5, decimal_places=1, default=Decimal(1)
     )
@@ -91,7 +93,7 @@ class Tournament(models.Model):
             self.delete()
 
     def points(self, outcome: str) -> Decimal:
-        """Return the points one engaged player earns for *outcome*."""
+        """Return the charter rate for *outcome*, per player in the match."""
         return {
             Outcome.WIN: self.win_points,
             Outcome.DRAW: self.draw_points,
@@ -142,8 +144,9 @@ class Tournament(models.Model):
     def standings(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         """Return the team ranking and the player ranking, best first.
 
-        A team earns what its engaged players earn, so a team's points are the
-        sum of its players' points.
+        A match is worth the charter's rate for an outcome times the number of
+        players it engaged, all teams included. Each team earns that for its
+        outcome, and so does each of its engaged players.
 
         Returns
         -------
@@ -158,18 +161,21 @@ class Tournament(models.Model):
             for p in Player.objects.filter(team__tournament=self).select_related("team")
         }
         seen: set[tuple[int, int]] = set()
-        results = Result.objects.filter(match__tournament=self).select_related("player")
+        results = list(
+            Result.objects.filter(match__tournament=self).select_related("player")
+        )
+        engaged = Counter(r.match_id for r in results)
         for r in results:
-            pts = self.points(r.outcome)
+            gain = self.points(r.outcome) * engaged[r.match_id]
             prow, trow = players[r.player_id], teams[r.player.team_id]
             prow[r.outcome] += 1
             prow["played"] += 1
-            prow["points"] += pts
-            trow["points"] += pts
+            prow["points"] += gain
             if (r.match_id, r.player.team_id) not in seen:
                 seen.add((r.match_id, r.player.team_id))
                 trow[r.outcome] += 1
                 trow["played"] += 1
+                trow["points"] += gain
 
         def order(rows: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
             return sorted(rows.values(), key=lambda r: (-r["points"], r["obj"].name))

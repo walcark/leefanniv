@@ -6,8 +6,8 @@ from leefanniv.models import Game, Match, Tournament
 
 
 @pytest.mark.django_db
-def test_charter_points_scale_with_engaged_players(client):
-    t = Tournament.objects.create(name="Soirée")  # charter: 1 / 0.5 / 0 per player
+def test_match_value_scales_with_all_engaged_players(client):
+    t = Tournament.objects.create(name="Soirée")  # charter: 1 / 0.5 / 0
     red, blue = t.teams.create(name="Rouge"), t.teams.create(name="Bleu")
     alice, bob = red.players.create(name="Alice"), red.players.create(name="Bob")
     carol, dan = blue.players.create(name="Carol"), blue.players.create(name="Dan")
@@ -18,12 +18,12 @@ def test_charter_points_scale_with_engaged_players(client):
 
     teams, players = t.standings()
     assert [(r["obj"].name, r["points"], r["played"], r["W"]) for r in teams] == [
-        ("Rouge", Decimal("2.5"), 2, 1),
-        ("Bleu", Decimal("0.5"), 2, 0),
+        ("Rouge", Decimal("5"), 2, 1),  # 2v2 win: 4 engaged x 1, 1v1 draw: 2 x 0.5
+        ("Bleu", Decimal("1"), 2, 0),
     ]
     assert [(r["obj"].name, r["points"]) for r in players][:2] == [
-        ("Alice", Decimal("1.5")),
-        ("Bob", Decimal("1")),
+        ("Alice", Decimal("5")),
+        ("Bob", Decimal("4")),
     ]
     assert client.get(f"/t/{t.pk}/").status_code == 200
     charter = client.get(f"/t/{t.pk}/charte/").content.decode()
@@ -49,7 +49,7 @@ def test_record_match_via_post(client):
     g = Game.objects.create(name="Uno")
     post = {"action": "match", "game": g.pk, "players": [a.pk, c.pk], "winner": red.pk}
     client.post(f"/t/{t.pk}/", post)
-    assert t.standings()[0][0]["points"] == 3
+    assert t.standings()[0][0]["points"] == 6  # 1v1: 2 engaged x 3
 
 
 @pytest.mark.django_db

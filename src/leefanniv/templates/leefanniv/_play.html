@@ -277,7 +277,7 @@
     else if (sizes.length < 2) problem = "Touche les joueurs engagés dans au moins deux équipes.";
     else if (!sizes.every((s) => s === n)) problem = `Il faut autant de joueurs de chaque côté (${sizes.join(" contre ")}).`;
     hint.textContent = problem ||
-      `${sizes.join(" contre ")} : victoire +${fmt(win * n)}, égalité +${fmt(draw * n)} par équipe.`;
+      `${sizes.join(" contre ")} (${n * sizes.length} joueurs) : victoire +${fmt(win * n * sizes.length)}, égalité +${fmt(draw * n * sizes.length)} par équipe.`;
     hint.classList.toggle("ok", !problem);
     form.querySelectorAll("button[name=winner]").forEach((b) => {
       b.hidden = b.value !== "draw" && !counts[b.value];
