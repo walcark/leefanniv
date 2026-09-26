@@ -9,14 +9,16 @@
     -webkit-background-clip:text; background-clip:text; color:transparent; }
   .sh .meta { font-size:clamp(1rem, 1.4vw, 1.8rem); font-weight:800; color:var(--muted); }
   .cols { display:grid; grid-template-columns:minmax(0, .75fr) minmax(0, 1.9fr) minmax(0, 1fr); gap:1.6vw; align-items:start; }
-  .grow { display:flex; align-items:center; gap:.8vw; padding:.6vw .8vw; border-radius:1.1vw; margin-bottom:.5vw;
-    font-size:clamp(1rem, 1.35vw, 1.9rem); font-weight:800; background:var(--pink-soft); }
-  .grow:nth-child(5n+2) { background:color-mix(in srgb, var(--blue) 35%, var(--card)); }
-  .grow:nth-child(5n+3) { background:color-mix(in srgb, var(--mint) 40%, var(--card)); }
-  .grow:nth-child(5n+4) { background:color-mix(in srgb, var(--lemon) 45%, var(--card)); }
-  .grow:nth-child(5n+5) { background:color-mix(in srgb, var(--lilac) 40%, var(--card)); }
-  .grow .ge { font-size:1.5em; } .grow .nm { flex:1; min-width:0; }
-  .grow small { display:block; color:var(--muted); font-weight:800; font-size:.7em; }
+  .ggrid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:.7vw; }
+  .gcard { display:grid; justify-items:center; align-content:center; gap:.2vw; padding:1vw .5vw; border-radius:1.3vw;
+    text-align:center; background:var(--pink-soft); font-weight:800; }
+  .gcard:nth-child(5n+2) { background:color-mix(in srgb, var(--blue) 35%, var(--card)); }
+  .gcard:nth-child(5n+3) { background:color-mix(in srgb, var(--mint) 40%, var(--card)); }
+  .gcard:nth-child(5n+4) { background:color-mix(in srgb, var(--lemon) 45%, var(--card)); }
+  .gcard:nth-child(5n+5) { background:color-mix(in srgb, var(--lilac) 40%, var(--card)); }
+  .gcard .ge { font-size:clamp(1.8rem, 2.8vw, 3.8rem); line-height:1.1; }
+  .gcard strong { font-size:clamp(.95rem, 1.2vw, 1.7rem); line-height:1.2; }
+  .gcard small { color:var(--muted); font-size:clamp(.75rem, .85vw, 1.2rem); }
   .card { border-radius:2vw; padding:1.6vw; }
   h2 { font-size:clamp(1.2rem, 1.9vw, 2.6rem); margin-bottom:1.2vw; }
 
@@ -73,10 +75,10 @@
   <div class="cols">
     <section class="card">
       <h2>🎲 Jeux</h2>
-      <div>
+      <div class="ggrid">
         {% for g in games %}
-          <div class="grow"><span class="ge">{{ g.emoji }}</span><span class="nm">{{ g.name }}
-            <small>{{ g.played }} match{{ g.played|pluralize:"s" }}</small></span></div>
+          <div class="gcard"><span class="ge">{{ g.emoji }}</span><strong>{{ g.name }}</strong>
+            <small>{{ g.played }} match{{ g.played|pluralize:"s" }}</small></div>
         {% empty %}<p class="muted">Aucun jeu.</p>{% endfor %}
       </div>
     </section>
