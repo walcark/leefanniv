@@ -322,6 +322,11 @@ class BracketMatch(models.Model):
     def __str__(self) -> str:
         return f"{self.tournament} R{self.round} #{self.slot}"
 
+    @property
+    def sides(self) -> list[tuple[Team | None, Team | None]]:
+        """Return ``(team, opponent)`` for both slots, for display."""
+        return [(self.team_a, self.team_b), (self.team_b, self.team_a)]
+
     def set_winner(self, team: Team | None) -> None:
         """Record *team* as the winner (``None`` to undo) and advance it.
 

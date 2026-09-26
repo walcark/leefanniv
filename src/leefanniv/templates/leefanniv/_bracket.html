@@ -8,13 +8,14 @@
   .round h3 { margin:0 0 .6rem; font-size:.95rem; font-weight:900; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
   .round .ms { flex:1; display:flex; flex-direction:column; justify-content:space-around; gap:.8rem; }
   .bm { background:var(--card); border-radius:18px; box-shadow:var(--shadow); overflow:hidden; }
-  .bm button { display:flex; align-items:center; gap:.55rem; width:100%; padding:.65rem .75rem; border:0;
+  .bm .slot { display:flex; align-items:center; gap:.55rem; width:100%; padding:.65rem .75rem; border:0;
     background:none; font:inherit; font-weight:800; color:var(--ink); text-align:left; cursor:pointer; }
-  .bm button + button { border-top:2px dashed var(--line); }
-  .bm button:disabled { cursor:default; color:var(--muted); font-weight:700; }
-  .bm button.win { background:color-mix(in srgb, var(--team) 55%, var(--card)); }
-  .bm button.win::after { content:"✓"; margin-left:auto; }
-  .bm.decided button:not(.win) { opacity:.45; }
+  .bm .slot + .slot { border-top:2px dashed var(--line); }
+  .bm .slot:disabled, .bm .slot.tbd-slot { cursor:default; color:var(--muted); font-weight:700; }
+  .bm div.slot { cursor:default; }
+  .bm .slot.win { background:color-mix(in srgb, var(--team) 55%, var(--card)); }
+  .bm .slot.win::after { content:"✓"; margin-left:auto; }
+  .bm.decided .slot:not(.win) { opacity:.45; }
   .bm .avatar { width:1.8rem; height:1.8rem; font-size:.75rem; }
   .tbd { width:1.8rem; height:1.8rem; border-radius:50%; border:2px dashed var(--line); flex:none; }
 </style>
@@ -25,29 +26,33 @@
       <div class="champ" style="--team:{{ champ.color }}"><span class="avatar">{{ champ.initials }}</span>🎉 {{ champ.name }} remporte le tournoi ! 🎉</div>
     {% endif %}
   {% endwith %}{% endwith %}
-  <p class="muted">👆 Touche l'équipe gagnante de chaque match. Touche-la à nouveau pour annuler.</p>
+  {% if not readonly %}<p class="muted">👆 Touche l'équipe gagnante de chaque match. Touche-la à nouveau pour annuler.</p>{% endif %}
   <div class="bracket">
     {% for r in rounds %}
       <div class="round"><h3>{{ r.label }}</h3>
         <div class="ms">
           {% for m in r.matches %}
+            {% with tag=readonly|yesno:"div,button" %}
+            {% if readonly %}<div class="bm {% if m.winner %}decided{% endif %}">{% else %}
             <form method="post" class="bm {% if m.winner %}decided{% endif %}">{% csrf_token %}
-              <input type="hidden" name="action" value="winner"><input type="hidden" name="match" value="{{ m.pk }}">
-              {% if m.team_a %}
-                <button name="team" value="{{ m.team_a.pk }}" style="--team:{{ m.team_a.color }}" {% if m.winner_id == m.team_a_id %}class="win"{% endif %} {% if not m.team_b %}disabled{% endif %}><span class="avatar">{{ m.team_a.initials }}</span>{{ m.team_a.name }}</button>
-              {% else %}<button disabled><span class="tbd"></span>À venir</button>{% endif %}
-              {% if m.team_b %}
-                <button name="team" value="{{ m.team_b.pk }}" style="--team:{{ m.team_b.color }}" {% if m.winner_id == m.team_b_id %}class="win"{% endif %} {% if not m.team_a %}disabled{% endif %}><span class="avatar">{{ m.team_b.initials }}</span>{{ m.team_b.name }}</button>
-              {% else %}<button disabled><span class="tbd"></span>À venir</button>{% endif %}
-            </form>
+              <input type="hidden" name="action" value="winner"><input type="hidden" name="match" value="{{ m.pk }}">{% endif %}
+              {% for team, other in m.sides %}
+                {% if team %}
+                  <{{ tag }} class="slot {% if m.winner_id == team.pk %}win{% endif %}" name="team" value="{{ team.pk }}" style="--team:{{ team.color }}" {% if not other %}disabled{% endif %}><span class="avatar">{{ team.initials }}</span>{{ team.name }}</{{ tag }}>
+                {% else %}<{{ tag }} class="slot tbd-slot" disabled><span class="tbd"></span>À venir</{{ tag }}>{% endif %}
+              {% endfor %}
+            {% if readonly %}</div>{% else %}</form>{% endif %}
+            {% endwith %}
           {% endfor %}
         </div>
       </div>
     {% endfor %}
   </div>
-  <form method="post" onsubmit="return confirm('Effacer le tableau et tous ses résultats ?')" style="text-align:right">{% csrf_token %}
+  {% if not readonly %}<form method="post" onsubmit="return confirm('Effacer le tableau et tous ses résultats ?')" style="text-align:right">{% csrf_token %}
     <input type="hidden" name="action" value="reset_bracket"><button class="btn ghost">↺ Recommencer le tableau</button>
-  </form>
+  </form>{% endif %}
+{% elif readonly %}
+  <div class="card"><h2>🏆 Le tableau n'est pas encore lancé</h2></div>
 {% else %}
   <div class="card">
     <h2>🚀 Pour commencer</h2>

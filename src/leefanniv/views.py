@@ -64,6 +64,9 @@ def tournament(request: HttpRequest, pk: int, tab: str = "play") -> HttpResponse
         else:
             return redirect(_handle_action(request, t))
     team_rows, player_rows = t.standings()
+    top = max((r["points"] for r in team_rows), default=0)
+    for r in team_rows:
+        r["pct"] = int(max(r["points"], 0) * 100 / top) if top > 0 else 0
     ctx = {
         "t": t,
         "tab": tab,
@@ -83,11 +86,13 @@ def tournament(request: HttpRequest, pk: int, tab: str = "play") -> HttpResponse
             (n, t.win_points * n, t.draw_points * n, t.loss_points * n)
             for n in (1, 2, 3)
         ],
+        "match_count": t.matches.count(),
         "matches": t.matches.select_related("game").prefetch_related(
             "results__player__team"
         )[:30],
     }
-    return render(request, "leefanniv/tournament.html", ctx)
+    page = "screen" if tab == "screen" else "tournament"
+    return render(request, f"leefanniv/{page}.html", ctx)
 
 
 def _handle_action(request: HttpRequest, t: Tournament) -> str:

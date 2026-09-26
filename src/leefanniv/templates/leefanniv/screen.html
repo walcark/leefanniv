@@ -1,0 +1,123 @@
+{% extends "leefanniv/base.html" %}
+{% block title %}📺 {{ t.name }}{% endblock %}
+{% block style %}
+<style>
+  main { max-width:none; padding:2vw 2.5vw; }
+  .sh { display:flex; align-items:center; gap:1.5vw; margin-bottom:1.6vw; }
+  .sh .title { font-size:clamp(1.8rem, 3.4vw, 4.5rem); font-weight:900; letter-spacing:-.02em; flex:1; }
+  .sh .title span { background:linear-gradient(90deg,var(--pink),var(--lilac),var(--blue));
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sh .meta { font-size:clamp(1rem, 1.4vw, 1.8rem); font-weight:800; color:var(--muted); }
+  .cols { display:grid; grid-template-columns:minmax(0, 1.9fr) minmax(0, 1fr); gap:1.6vw; align-items:start; }
+  .card { border-radius:2vw; padding:1.6vw; }
+  h2 { font-size:clamp(1.2rem, 1.9vw, 2.6rem); margin-bottom:1.2vw; }
+
+  .trow { display:flex; align-items:center; gap:1.2vw; padding:1vw; border-radius:1.4vw; margin-bottom:.7vw;
+    position:relative; overflow:hidden; background:var(--bg); }
+  .trow .bar { position:absolute; inset:0 auto 0 0; background:color-mix(in srgb, var(--team) 45%, var(--card));
+    transition:width .8s ease; z-index:0; }
+  .trow > :not(.bar) { position:relative; z-index:1; }
+  .trow .pos { width:3.6vw; text-align:center; font-size:clamp(1.4rem, 2.6vw, 3.6rem); font-weight:900; color:var(--muted); }
+  .trow .avatar { width:clamp(2.6rem, 4.4vw, 6rem); height:clamp(2.6rem, 4.4vw, 6rem); font-size:clamp(1rem, 1.6vw, 2.2rem); }
+  .trow .nm { flex:1; min-width:0; font-size:clamp(1.3rem, 2.3vw, 3.2rem); font-weight:900; }
+  .trow .nm small { display:block; font-size:.45em; color:var(--muted); font-weight:800; }
+  .trow .pts { font-size:clamp(1.8rem, 3.6vw, 5rem); font-weight:900; font-variant-numeric:tabular-nums; }
+  .trow .pts small { font-size:.3em; color:var(--muted); margin-left:.2em; }
+  .trow.r1 { box-shadow:0 0 0 .3vw var(--pink); }
+
+  .prow { display:flex; align-items:center; gap:.8vw; padding:.55vw 0; font-size:clamp(1rem, 1.5vw, 2rem); font-weight:800; }
+  .prow .avatar { width:clamp(1.8rem, 2.6vw, 3.4rem); height:clamp(1.8rem, 2.6vw, 3.4rem); font-size:.8em; }
+  .prow .nm { flex:1; } .prow .pts { font-weight:900; font-variant-numeric:tabular-nums; }
+  .mrow { padding:.7vw 0; border-bottom:.2vw solid var(--line); font-size:clamp(.95rem, 1.25vw, 1.7rem); font-weight:800; }
+  .mrow:last-child { border:0; }
+  .mrow .vs { display:flex; flex-wrap:wrap; gap:.4vw; margin-top:.4vw; align-items:center; }
+  .mrow .chip { background:color-mix(in srgb, var(--team) 50%, var(--card)); font-size:.85em; }
+  .mrow .chip.L { opacity:.55; }
+  .empty { font-size:clamp(1.2rem, 2vw, 2.6rem); color:var(--muted); font-weight:800; text-align:center; padding:3vw; }
+
+  /* Bracket, scaled up for the big screen. */
+  #live .bracket { overflow:visible; }
+  #live .round { flex:1 1 0; }
+  #live .round h3 { font-size:clamp(1rem, 1.5vw, 2rem); }
+  #live .bm .slot { font-size:clamp(1rem, 1.6vw, 2.2rem); padding:.9vw 1vw; }
+  #live .bm .avatar, #live .tbd { width:clamp(1.8rem, 2.6vw, 3.4rem); height:clamp(1.8rem, 2.6vw, 3.4rem); }
+  #live .champ { font-size:clamp(1.6rem, 3vw, 4rem); }
+
+  .fs { position:fixed; right:1rem; bottom:1rem; opacity:.25; }
+  .fs:hover { opacity:1; }
+  .live-dot { display:inline-block; width:.7em; height:.7em; border-radius:50%; background:var(--win); margin-right:.4em;
+    animation:pulse 2s infinite; }
+  .stale .live-dot { background:var(--loss); animation:none; }
+  @keyframes pulse { 50% { opacity:.3; } }
+</style>
+{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+<div id="live">
+  <div class="sh">
+    <div class="title">🎂 <span>{{ t.name }}</span></div>
+    <div class="meta"><span class="live-dot"></span>{% if t.kind == 'points' %}{{ match_count }} match{{ match_count|pluralize:"s" }} joué{{ match_count|pluralize:"s" }}{% else %}Tableau{% endif %}</div>
+  </div>
+
+  {% if t.kind == 'bracket' %}
+    {% include "leefanniv/_bracket.html" with readonly=True %}
+  {% else %}
+  <div class="cols">
+    <section class="card">
+      <h2>🏅 Classement des équipes</h2>
+      {% for row in team_rows %}
+        <div class="trow r{{ forloop.counter }}" style="--team:{{ row.obj.color }}">
+          <span class="bar" style="width:{{ row.pct }}%"></span>
+          <span class="pos">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}</span>
+          <span class="avatar">{{ row.obj.initials }}</span>
+          <span class="nm">{{ row.obj.name }}<small>{{ row.played }} match{{ row.played|pluralize:"s" }} · {{ row.W }}V {{ row.D }}N {{ row.L }}D</small></span>
+          <span class="pts">{{ row.points|floatformat:"-1" }}<small>pts</small></span>
+        </div>
+      {% empty %}<p class="empty">Les équipes arrivent bientôt…</p>{% endfor %}
+    </section>
+    <aside>
+      <section class="card">
+        <h2>🙋 Meilleurs joueurs</h2>
+        {% for row in player_rows|slice:":6" %}
+          <div class="prow" style="--team:{{ row.obj.team.color }}">
+            <span class="avatar">{{ row.obj.name|first|upper }}</span>
+            <span class="nm">{{ row.obj.name }}</span>
+            <span class="pts">{{ row.points|floatformat:"-1" }}</span>
+          </div>
+        {% empty %}<p class="muted">Aucun joueur.</p>{% endfor %}
+      </section>
+      <section class="card">
+        <h2>🕒 Derniers matchs</h2>
+        {% for m in matches|slice:":4" %}
+          <div class="mrow">{{ m.game.emoji }} {{ m.game }} <span class="muted">· {{ m.played_at|date:"H:i" }}</span>
+            <div class="vs">
+              {% for team, ps, outcome in m.lineups %}
+                {% if not forloop.first %}<span class="muted">vs</span>{% endif %}
+                <span class="chip {{ outcome }}" style="--team:{{ team.color }}">{% if outcome == 'W' %}🏆 {% elif outcome == 'D' %}🤝 {% endif %}{{ team.name }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        {% empty %}<p class="muted">Pas encore de match.</p>{% endfor %}
+      </section>
+    </aside>
+  </div>
+  {% endif %}
+</div>
+<button class="btn soft fs" onclick="document.documentElement.requestFullscreen()">⛶ Plein écran</button>
+
+<script>
+// Poll the page every second and swap the live block only when it changed,
+// so the screen never flickers. A red dot means the server stopped answering.
+setInterval(async () => {
+  const live = document.getElementById("live");
+  try {
+    const res = await fetch(location.href, { cache: "no-store" });
+    const next = new DOMParser().parseFromString(await res.text(), "text/html").getElementById("live");
+    if (next && next.innerHTML !== live.innerHTML) live.replaceWith(next);
+    document.body.classList.remove("stale");
+  } catch {
+    document.body.classList.add("stale");
+  }
+}, 1000);
+</script>
+{% endblock %}

@@ -92,3 +92,17 @@ def test_delete_game_only_when_never_played(client):
     for g in (typo, played):
         client.post(f"/t/{t.pk}/", {"action": "delete_game", "game": g.pk})
     assert list(Game.objects.values_list("name", flat=True)) == ["Uno"]
+
+
+@pytest.mark.django_db
+def test_screen_live_block_is_stable_between_polls(client):
+    # The screen swaps its live block whenever the HTML differs, so anything
+    # per-request in it (a CSRF token) would make it redraw every second.
+    for kind in ("points", "bracket"):
+        t = Tournament.objects.create(name="Soirée", kind=kind)
+        for name in "AB":
+            t.teams.create(name=name).players.create(name=name.lower())
+        if kind == "bracket":
+            t.start_bracket()
+        first, second = (client.get(f"/t/{t.pk}/ecran/").content for _ in range(2))
+        assert first == second and b"csrfmiddlewaretoken" not in first

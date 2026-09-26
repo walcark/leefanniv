@@ -11,5 +11,6 @@ urlpatterns = [
     path("t/<int:pk>/", views.tournament, name="tournament"),
     path("t/<int:pk>/equipes/", views.tournament, {"tab": "teams"}, name="teams"),
     path("t/<int:pk>/charte/", views.tournament, {"tab": "charter"}, name="charter"),
+    path("t/<int:pk>/ecran/", views.tournament, {"tab": "screen"}, name="screen"),
     path("admin/", admin.site.urls),
 ]

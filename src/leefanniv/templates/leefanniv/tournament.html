@@ -26,6 +26,7 @@
   <nav class="tabs">
     <a href="{% url 'tournament' t.pk %}" {% if tab == 'play' %}class="on"{% endif %}>{% if t.kind == 'bracket' %}🏆 Tableau{% else %}🎮 Partie{% endif %}</a>
     <a href="{% url 'teams' t.pk %}" {% if tab == 'teams' %}class="on"{% endif %}>👯 Équipes</a>
+    <a href="{% url 'screen' t.pk %}" target="_blank" title="Affichage grand écran">📺 Écran</a>
     {% if t.kind == 'points' %}<a href="{% url 'charter' t.pk %}" {% if tab == 'charter' %}class="on"{% endif %}>📜 Charte</a>{% endif %}
   </nav>
 </div>

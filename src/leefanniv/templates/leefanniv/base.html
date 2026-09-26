@@ -88,12 +88,12 @@
 {% block style %}{% endblock %}
 </head>
 <body>
-<header>
+{% block header %}<header>
   <a class="brand" href="{% url 'home' %}">🎂 <span>Leefanniv</span></a>
   <nav>
     <a href="{% url 'tournaments' %}" {% if request.resolver_match.url_name == 'tournaments' %}class="on"{% endif %}>Compétitions</a>
   </nav>
-</header>
+</header>{% endblock %}
 <main>
   {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
   {% block content %}{% endblock %}
