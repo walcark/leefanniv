@@ -1,5 +1,5 @@
 <style>
-  .play { display:grid; gap:1rem; grid-template-columns:300px minmax(0, 1fr) 340px; align-items:start; }
+  .play { display:grid; gap:1rem; grid-template-columns:fit-content(460px) minmax(0, 1fr) 340px; align-items:start; }
   .p-games, .p-rank { position:sticky; top:4.5rem; }
   .play > section { scroll-margin-top:4.5rem; }
   .tabbar { display:none; }
@@ -18,10 +18,11 @@
   }
 
   /* Games */
-  /* Tiles take their name's width, grow to fill the row, and wrap the name
-     only when it is wider than the whole column. */
-  .ggrid { display:flex; flex-wrap:wrap; gap:.55rem; margin-bottom:1rem; }
-  .gwrap { position:relative; flex:1 1 auto; min-width:104px; max-width:100%; }
+  /* Two equal tiles per row; the Games column widens to fit the longest
+     name (up to a cap, past which names wrap). */
+  .p-games .card { min-width:260px; }
+  .ggrid { display:grid; grid-template-columns:repeat(2, 1fr); gap:.55rem; margin-bottom:1rem; }
+  .gwrap { position:relative; }
   .gwrap > input { display:none; }
   .gcard { display:grid; justify-items:center; gap:.15rem; padding:.8rem .7rem; border-radius:18px; height:100%;
     text-align:center; background:var(--pink-soft); cursor:pointer; border:3px solid transparent; transition:transform .1s; }

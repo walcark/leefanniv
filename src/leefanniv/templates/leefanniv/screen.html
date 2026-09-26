@@ -8,9 +8,9 @@
   .sh .title span { background:linear-gradient(90deg,var(--pink),var(--lilac),var(--blue));
     -webkit-background-clip:text; background-clip:text; color:transparent; }
   .sh .meta { font-size:clamp(1rem, 1.4vw, 1.8rem); font-weight:800; color:var(--muted); }
-  .cols { display:grid; grid-template-columns:minmax(0, .95fr) minmax(0, 1.9fr) minmax(0, 1fr); gap:1.6vw; align-items:start; }
-  .ggrid { display:flex; flex-wrap:wrap; gap:.7vw; }
-  .gcard { display:grid; justify-items:center; align-content:center; gap:.1vw; padding:.7vw .8vw; flex:1 1 auto; min-width:7vw; max-width:100%; border-radius:1.3vw;
+  .cols { display:grid; grid-template-columns:fit-content(26vw) minmax(0, 1.9fr) minmax(24vw, 1fr); gap:1.6vw; align-items:start; }
+  .ggrid { display:grid; grid-template-columns:repeat(2, 1fr); gap:.7vw; }
+  .gcard { display:grid; justify-items:center; align-content:center; gap:.1vw; padding:.7vw .8vw; border-radius:1.3vw;
     text-align:center; background:var(--pink-soft); font-weight:800; }
   .gcard:nth-child(5n+2) { background:color-mix(in srgb, var(--blue) 35%, var(--card)); }
   .gcard:nth-child(5n+3) { background:color-mix(in srgb, var(--mint) 40%, var(--card)); }
