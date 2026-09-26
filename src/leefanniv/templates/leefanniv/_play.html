@@ -1,0 +1,291 @@
+<style>
+  .play { display:grid; gap:1rem; grid-template-columns:260px minmax(0, 1fr) 340px; align-items:start; }
+  .p-games, .p-rank { position:sticky; top:4.5rem; }
+  .play > section { scroll-margin-top:4.5rem; }
+  .tabbar { display:none; }
+  @media (max-width:999px) {
+    .play { display:block; padding-bottom:5.5rem; }
+    .play > section { display:none; }
+    .play[data-tab=jeux] .p-games, .play[data-tab=match] .p-match,
+    .play[data-tab=classement] .p-rank { display:block; }
+    .tabbar { display:flex; position:fixed; left:0; right:0; bottom:0; z-index:20; gap:.3rem;
+      padding:.45rem .6rem calc(.45rem + env(safe-area-inset-bottom)); background:var(--card);
+      border-radius:22px 22px 0 0; box-shadow:0 -4px 24px rgba(214,120,160,.18); }
+    .tabbar a { flex:1; display:grid; justify-items:center; text-decoration:none; font-weight:800;
+      font-size:.78rem; color:var(--muted); padding:.35rem; border-radius:16px; }
+    .tabbar a .i { font-size:1.45rem; line-height:1.2; }
+    .tabbar a.on { background:var(--pink-soft); color:var(--ink); }
+  }
+
+  /* Games */
+  .ggrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(104px, 1fr)); gap:.55rem; margin-bottom:1rem; }
+  .gwrap { position:relative; }
+  .gwrap > input { display:none; }
+  .gcard { display:grid; justify-items:center; gap:.15rem; padding:.8rem .4rem; border-radius:18px; height:100%;
+    text-align:center; background:var(--pink-soft); cursor:pointer; border:3px solid transparent; transition:transform .1s; }
+  .gwrap:nth-child(5n+2) .gcard { background:color-mix(in srgb, var(--blue) 35%, var(--card)); }
+  .gwrap:nth-child(5n+3) .gcard { background:color-mix(in srgb, var(--mint) 40%, var(--card)); }
+  .gwrap:nth-child(5n+4) .gcard { background:color-mix(in srgb, var(--lemon) 45%, var(--card)); }
+  .gwrap:nth-child(5n+5) .gcard { background:color-mix(in srgb, var(--lilac) 40%, var(--card)); }
+  .gcard:hover { transform:translateY(-2px); }
+  .gwrap > input:checked + .gcard { border-color:var(--pink); box-shadow:0 4px 14px rgba(255,126,176,.4); }
+  .gwrap > input:checked + .gcard::after { content:"✓"; position:absolute; top:.35rem; left:.5rem;
+    width:1.4rem; height:1.4rem; border-radius:50%; background:var(--pink); color:#fff; font-weight:900; font-size:.8rem; display:grid; place-items:center; }
+  .gdel { position:absolute; top:.2rem; right:.2rem; margin:0; }
+  .gdel button { border:0; background:none; color:var(--muted); font:inherit; font-weight:900; cursor:pointer; padding:.2rem .45rem; border-radius:50%; }
+  .gdel button:hover { background:var(--card); color:var(--loss); }
+  .picked { display:flex; align-items:center; gap:.6rem; width:100%; font:inherit; font-weight:800; font-size:1.05rem;
+    padding:.75rem .9rem; border-radius:16px; border:2px dashed var(--line); background:var(--bg); color:var(--muted); cursor:pointer; text-align:left; }
+  .picked.on { border:2px solid var(--pink); background:var(--pink-soft); color:var(--ink); }
+  .picked .change { margin-left:auto; font-size:.85rem; color:var(--pink); }
+  @media (min-width:1000px) { .picked { cursor:default; } .picked .change { display:none; } }
+  .gcard .ge { font-size:2rem; } .gcard strong { font-size:.95rem; line-height:1.2; }
+  .gcard small { color:var(--muted); font-weight:700; font-size:.75rem; }
+  .row.addgame > input[type=text] { min-width:0; }
+  .row.addgame > input[name=emoji] { width:3.4rem; text-align:center; flex:none; }
+
+  /* Match form */
+  .step { display:flex; align-items:center; gap:.5rem; font-weight:900; margin:1.1rem 0 .55rem; }
+  .step:first-of-type { margin-top:0; }
+  .step .n { width:1.6rem; height:1.6rem; border-radius:50%; display:grid; place-items:center;
+    background:var(--pink); color:#fff; font-size:.85rem; flex:none; }
+  .step small { color:var(--muted); font-weight:700; }
+  .lineup input { display:none; }
+  .lineups { display:grid; gap:.55rem; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); }
+  .lineup { border-radius:18px; padding:.7rem; background:color-mix(in srgb, var(--team) 16%, var(--card));
+    border:2px solid color-mix(in srgb, var(--team) 45%, var(--card)); }
+  .lineup .lh { display:flex; align-items:center; gap:.5rem; font-weight:900; margin-bottom:.5rem; }
+  .lineup .count { margin-left:auto; min-width:1.7rem; height:1.7rem; border-radius:999px; display:grid; place-items:center;
+    font-size:.85rem; background:var(--card); color:var(--muted); }
+  .lineup .count.on { background:var(--team); color:#3b2a40; }
+  .lineup .pl { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .lineup label { padding:.45rem .8rem; border-radius:999px; background:var(--card); font-weight:800; cursor:pointer;
+    border:2px solid transparent; user-select:none; }
+  .lineup input:checked + label { background:var(--team); border-color:color-mix(in srgb, var(--team) 70%, #3b2a40); }
+  .lineup input:checked + label::before { content:"✓ "; }
+  .hint { font-weight:700; color:var(--muted); margin:.2rem 0 .7rem; }
+  .hint.ok { color:var(--ink); }
+  .results { display:grid; gap:.5rem; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); }
+  .wbtn { font:inherit; font-weight:900; font-size:1rem; padding:.95rem .8rem; border-radius:18px; border:0; cursor:pointer;
+    background:var(--team, var(--lemon)); color:#3b2a40; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+  .wbtn.draw { background:color-mix(in srgb, var(--draw) 45%, var(--card)); }
+  .wbtn:disabled { opacity:.35; cursor:not-allowed; box-shadow:none; }
+  .wbtn:not(:disabled):active { transform:scale(.97); }
+
+  /* History */
+  .hist { display:flex; gap:.5rem; align-items:flex-start; padding:.7rem 0; border-bottom:2px solid var(--line); }
+  .hist:last-child { border:0; }
+  .hist .body { flex:1; }
+  .hist .vs { display:flex; flex-wrap:wrap; align-items:center; gap:.35rem; margin-top:.35rem; }
+  .hist .chip { background:color-mix(in srgb, var(--team) 50%, var(--card)); }
+  .hist .chip.L { opacity:.55; }
+  .hist .chip small { font-weight:600; }
+
+  /* Ranking */
+  .rkseg { display:flex; background:var(--bg); border-radius:14px; padding:3px; margin-bottom:.8rem; }
+  .rkseg label { flex:1; text-align:center; padding:.45rem; border-radius:11px; font-weight:800; cursor:pointer; color:var(--muted); }
+  #rk-t:checked ~ .rkseg label[for=rk-t], #rk-p:checked ~ .rkseg label[for=rk-p] { background:var(--card); color:var(--ink); box-shadow:0 1px 4px rgba(0,0,0,.1); }
+  .rk-players, #rk-p:checked ~ .rk-teams { display:none; }
+  #rk-p:checked ~ .rk-players { display:block; }
+  .rk { display:flex; align-items:center; gap:.6rem; padding:.55rem; border-radius:16px; margin-bottom:.3rem; }
+  .rk.r1 { background:color-mix(in srgb, var(--team) 35%, var(--card)); }
+  .rk .pos { width:1.7rem; text-align:center; font-weight:900; font-size:1.15rem; color:var(--muted); }
+  .rk .nm { flex:1; min-width:0; } .rk .nm small { display:block; color:var(--muted); font-size:.8rem; }
+  .rk .pts { font-weight:900; font-size:1.45rem; font-variant-numeric:tabular-nums; }
+  .rk .pts small { font-size:.7rem; color:var(--muted); margin-left:.15rem; }
+</style>
+
+<div class="play" data-tab="match">
+  <section class="p-games" id="jeux">
+    <div class="card">
+      <h2>🎲 Jeux</h2>
+      <div class="ggrid">
+        {% for g in games %}
+          <div class="gwrap">
+            <input type="radio" name="game" form="matchform" id="g{{ g.pk }}" value="{{ g.pk }}" data-label="{{ g.emoji }} {{ g.name }}" {% if g.pk|stringformat:"s" == picked_game %}checked{% endif %}>
+            <label class="gcard" for="g{{ g.pk }}" title="Jouer à {{ g.name }}">
+              <span class="ge">{{ g.emoji }}</span><strong>{{ g.name }}</strong>
+              <small>{{ g.played }} match{{ g.played|pluralize:"s" }}</small></label>
+            {% if not g.used %}
+              <form method="post" class="gdel" onsubmit="return confirm('Retirer {{ g.name|escapejs }} de la liste des jeux ?')">{% csrf_token %}
+                <input type="hidden" name="action" value="delete_game"><input type="hidden" name="game" value="{{ g.pk }}">
+                <button title="Retirer ce jeu">✕</button></form>
+            {% endif %}
+          </div>
+        {% empty %}<p class="muted">Aucun jeu : ajoute le premier ci-dessous.</p>{% endfor %}
+      </div>
+      <form method="post" class="row addgame">{% csrf_token %}
+        <input type="hidden" name="action" value="game">
+        <input type="text" name="emoji" placeholder="🎲" maxlength="8" aria-label="Emoji">
+        <input type="text" name="name" placeholder="Nouveau jeu" required>
+        <button class="btn">+</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="p-match" id="match">
+    <div class="card">
+      <h2>⚔️ Nouveau match</h2>
+      {% if not games or teams|length < 2 or not players %}
+        <ol class="steps">
+          <li class="{% if games %}done{% endif %}"><span class="n">1</span>Ajoute des jeux dans la colonne Jeux</li>
+          <li class="{% if teams|length > 1 %}done{% endif %}"><span class="n">2</span><span>Crée au moins deux équipes dans <a href="{% url 'teams' t.pk %}">Équipes</a></span></li>
+          <li class="{% if players %}done{% endif %}"><span class="n">3</span><span>Ajoute les joueurs de chaque équipe</span></li>
+          <li><span class="n">4</span>Enregistre les matchs ici, le classement suit</li>
+        </ol>
+      {% else %}
+      <form method="post" id="matchform" data-win="{{ t.win_points }}" data-draw="{{ t.draw_points }}">{% csrf_token %}
+        <input type="hidden" name="action" value="match">
+        <div class="step"><span class="n">1</span>Quel jeu ?</div>
+        <button type="button" class="picked" id="picked" data-goto="jeux">
+          <span id="picked-name">Touche un jeu dans la colonne Jeux</span><span class="change">Changer</span></button>
+        <div class="step"><span class="n">2</span>Qui joue ? <small>autant par équipe</small></div>
+        <div class="lineups">
+          {% for team in teams %}{% if team.players.all %}
+            <div class="lineup" style="--team:{{ team.color }}">
+              <div class="lh"><span class="avatar sm">{{ team.initials }}</span>{{ team.name }}<span class="count" data-team="{{ team.pk }}">0</span></div>
+              <div class="pl">
+                {% for p in team.players.all %}
+                  <input type="checkbox" name="players" value="{{ p.pk }}" id="pl{{ p.pk }}" data-team="{{ team.pk }}"><label for="pl{{ p.pk }}">{{ p.name }}</label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}{% endfor %}
+        </div>
+        <div class="step"><span class="n">3</span>Qui a gagné ?</div>
+        <p class="hint" id="hint"></p>
+        <div class="results">
+          {% for team in teams %}{% if team.players.all %}
+            <button class="wbtn" name="winner" value="{{ team.pk }}" style="--team:{{ team.color }}">🏆 {{ team.name }}</button>
+          {% endif %}{% endfor %}
+          <button class="wbtn draw" name="winner" value="draw">🤝 Égalité</button>
+        </div>
+      </form>
+      {% endif %}
+    </div>
+
+    {% if matches %}
+    <div class="card">
+      <h2>🕒 Derniers matchs</h2>
+      {% for m in matches %}
+        <div class="hist">
+          <div class="body"><strong>{{ m.game.emoji }} {{ m.game }}</strong> <span class="muted">· {{ m.played_at|date:"H:i" }}</span>
+            <div class="vs">
+              {% for team, ps, outcome in m.lineups %}
+                {% if not forloop.first %}<span class="muted">vs</span>{% endif %}
+                <span class="chip {{ outcome }}" style="--team:{{ team.color }}">{% if outcome == 'W' %}🏆 {% elif outcome == 'D' %}🤝 {% endif %}{{ team.name }}
+                  <small>({% for p in ps %}{{ p.name }}{% if not forloop.last %}, {% endif %}{% endfor %})</small></span>
+              {% endfor %}
+            </div>
+          </div>
+          <form method="post" onsubmit="return confirm('Supprimer ce match ?')">{% csrf_token %}
+            <input type="hidden" name="action" value="delete_match"><input type="hidden" name="match" value="{{ m.pk }}">
+            <button class="btn ghost" title="Supprimer ce match">✕</button></form>
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="p-rank" id="classement">
+    <div class="card">
+      <h2>🏅 Classement</h2>
+      <input type="radio" name="rk" id="rk-t" checked hidden><input type="radio" name="rk" id="rk-p" hidden>
+      <div class="rkseg"><label for="rk-t">👯 Équipes</label><label for="rk-p">🙋 Joueurs</label></div>
+      <div class="rk-teams">
+        {% for row in team_rows %}
+          <div class="rk r{{ forloop.counter }}" style="--team:{{ row.obj.color }}">
+            <span class="pos">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}</span>
+            <span class="avatar">{{ row.obj.initials }}</span>
+            <span class="nm"><strong>{{ row.obj.name }}</strong>
+              <small>{{ row.played }} match{{ row.played|pluralize:"s" }} · {{ row.W }}V {{ row.D }}N {{ row.L }}D</small></span>
+            <span class="pts">{{ row.points|floatformat:"-1" }}<small>pts</small></span>
+          </div>
+        {% empty %}<p class="muted">Le classement apparaîtra avec les équipes.</p>{% endfor %}
+      </div>
+      <div class="rk-players">
+        {% for row in player_rows %}
+          <div class="rk r{{ forloop.counter }}" style="--team:{{ row.obj.team.color }}">
+            <span class="pos">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter }}{% endif %}</span>
+            <span class="avatar">{{ row.obj.name|first|upper }}</span>
+            <span class="nm"><strong>{{ row.obj.name }}</strong>
+              <small>{{ row.obj.team.name }} · {{ row.played }} match{{ row.played|pluralize:"s" }}</small></span>
+            <span class="pts">{{ row.points|floatformat:"-1" }}<small>pts</small></span>
+          </div>
+        {% empty %}<p class="muted">Aucun joueur pour l'instant.</p>{% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabbar">
+  <a href="#jeux"><span class="i">🎲</span>Jeux</a>
+  <a href="#match"><span class="i">⚔️</span>Match</a>
+  <a href="#classement"><span class="i">🏅</span>Classement</a>
+</nav>
+
+<script>
+(() => {
+  // Phone layout: one panel at a time, picked from the bottom tab bar.
+  const play = document.querySelector(".play");
+  const tabs = document.querySelectorAll(".tabbar a");
+  const show = (name) => {
+    play.dataset.tab = name;
+    tabs.forEach((a) => a.classList.toggle("on", a.hash === "#" + name));
+  };
+  tabs.forEach((a) => a.addEventListener("click", (e) => {
+    e.preventDefault();
+    show(a.hash.slice(1));
+    history.replaceState(null, "", a.hash);
+    scrollTo(0, 0);
+  }));
+  const start = location.hash.slice(1);
+  show(["jeux", "match", "classement"].includes(start) ? start : "match");
+  document.querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", () => {
+    show(b.dataset.goto);
+    scrollTo(0, 0);
+  }));
+  const phone = matchMedia("(max-width: 999px)");
+
+  // Match form: count engaged players, keep only playing teams as winners,
+  // and say what is missing until the lineups are valid.
+  const form = document.getElementById("matchform");
+  if (!form) return;
+  const hint = document.getElementById("hint");
+  const win = parseFloat(form.dataset.win), draw = parseFloat(form.dataset.draw);
+  const fmt = (n) => +n.toFixed(2);
+  const picked = document.getElementById("picked");
+  const update = () => {
+    const game = document.querySelector("input[name=game]:checked");
+    picked.classList.toggle("on", !!game);
+    if (game) document.getElementById("picked-name").textContent = game.dataset.label;
+    const counts = {};
+    form.querySelectorAll("input[name=players]:checked").forEach((c) => {
+      counts[c.dataset.team] = (counts[c.dataset.team] || 0) + 1;
+    });
+    form.querySelectorAll(".count").forEach((el) => {
+      const n = counts[el.dataset.team] || 0;
+      el.textContent = n;
+      el.classList.toggle("on", n > 0);
+    });
+    const sizes = Object.values(counts), n = sizes[0];
+    let problem = "";
+    if (!game) problem = "Choisis d'abord un jeu.";
+    else if (sizes.length < 2) problem = "Touche les joueurs engagés dans au moins deux équipes.";
+    else if (!sizes.every((s) => s === n)) problem = `Il faut autant de joueurs de chaque côté (${sizes.join(" contre ")}).`;
+    hint.textContent = problem ||
+      `${sizes.join(" contre ")} : victoire +${fmt(win * n)}, égalité +${fmt(draw * n)} par équipe.`;
+    hint.classList.toggle("ok", !problem);
+    form.querySelectorAll("button[name=winner]").forEach((b) => {
+      b.hidden = b.value !== "draw" && !counts[b.value];
+      b.disabled = !!problem;
+    });
+  };
+  document.addEventListener("change", (e) => {
+    update();
+    // On a phone, picking a game in its tab brings the match form back.
+    if (e.target.name === "game" && phone.matches) show("match");
+  });
+  update();
+})();
+</script>

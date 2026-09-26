@@ -1,0 +1,39 @@
+<style>
+  .charter { max-width:640px; }
+  .field { display:grid; gap:.3rem; font-weight:800; margin-bottom:1rem; }
+  .scale { display:grid; grid-template-columns:repeat(3, 1fr); gap:.6rem; margin:.3rem 0 1.2rem; }
+  .scale label { display:grid; gap:.3rem; font-weight:800; font-size:.92rem; text-align:center; padding:.8rem .5rem; border-radius:18px; }
+  .scale label small { color:var(--muted); font-weight:700; }
+  .scale input { width:100%; text-align:center; font-weight:900; font-size:1.2rem; }
+  .scale .W { background:color-mix(in srgb, var(--win) 22%, var(--card)); }
+  .scale .D { background:color-mix(in srgb, var(--draw) 22%, var(--card)); }
+  .scale .L { background:color-mix(in srgb, var(--loss) 22%, var(--card)); }
+  .ex { width:100%; border-collapse:collapse; margin-top:.5rem; }
+  .ex th, .ex td { padding:.5rem; text-align:center; border-bottom:2px solid var(--line); }
+  .ex th { color:var(--muted); font-size:.85rem; }
+  .ex td:first-child, .ex th:first-child { text-align:left; font-weight:800; }
+</style>
+<div class="card charter">
+  <h2>📜 Charte du tournoi</h2>
+  <p class="sub">Chaque joueur engagé dans un match rapporte ces points à son équipe. Les équipes s'affrontent avec le même nombre de joueurs.</p>
+  <form method="post">{% csrf_token %}
+    <label class="field">Nom du tournoi {{ charter.name }}</label>
+    <div class="scale">
+      <label class="W">🏆 Victoire {{ charter.win_points }}<small>par joueur</small></label>
+      <label class="D">🤝 Égalité {{ charter.draw_points }}<small>par joueur</small></label>
+      <label class="L">😢 Défaite {{ charter.loss_points }}<small>par joueur</small></label>
+    </div>
+    {{ charter.non_field_errors }}{{ charter.win_points.errors }}{{ charter.draw_points.errors }}{{ charter.loss_points.errors }}
+    <button class="btn block">Enregistrer la charte</button>
+  </form>
+</div>
+<div class="card charter">
+  <h2>🧮 Ce que ça donne, par équipe</h2>
+  <table class="ex">
+    <tr><th>Format</th><th>Victoire</th><th>Égalité</th><th>Défaite</th></tr>
+    {% for n, w, d, l in examples %}
+      <tr><td>{{ n }} contre {{ n }}</td><td>+{{ w|floatformat:"-1" }}</td><td>+{{ d|floatformat:"-1" }}</td><td>{{ l|floatformat:"-1" }}</td></tr>
+    {% endfor %}
+  </table>
+  <p class="muted">Modifier la charte recalcule aussi les matchs déjà joués.</p>
+</div>

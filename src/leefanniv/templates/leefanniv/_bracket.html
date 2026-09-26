@@ -1,0 +1,63 @@
+<style>
+  .champ { text-align:center; padding:1.3rem; border-radius:var(--radius); margin-bottom:1rem; font-weight:900;
+    font-size:1.3rem; background:linear-gradient(120deg, var(--pink-soft), color-mix(in srgb, var(--lilac) 45%, var(--card)), color-mix(in srgb, var(--blue) 45%, var(--card)));
+    box-shadow:var(--shadow); }
+  .champ .avatar { margin:0 auto .5rem; width:3.4rem; height:3.4rem; font-size:1.2rem; }
+  .bracket { display:flex; gap:1rem; overflow-x:auto; scroll-snap-type:x mandatory; padding:.2rem .2rem 1rem; }
+  .round { flex:0 0 min(240px, 80vw); display:flex; flex-direction:column; scroll-snap-align:start; }
+  .round h3 { margin:0 0 .6rem; font-size:.95rem; font-weight:900; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .round .ms { flex:1; display:flex; flex-direction:column; justify-content:space-around; gap:.8rem; }
+  .bm { background:var(--card); border-radius:18px; box-shadow:var(--shadow); overflow:hidden; }
+  .bm button { display:flex; align-items:center; gap:.55rem; width:100%; padding:.65rem .75rem; border:0;
+    background:none; font:inherit; font-weight:800; color:var(--ink); text-align:left; cursor:pointer; }
+  .bm button + button { border-top:2px dashed var(--line); }
+  .bm button:disabled { cursor:default; color:var(--muted); font-weight:700; }
+  .bm button.win { background:color-mix(in srgb, var(--team) 55%, var(--card)); }
+  .bm button.win::after { content:"✓"; margin-left:auto; }
+  .bm.decided button:not(.win) { opacity:.45; }
+  .bm .avatar { width:1.8rem; height:1.8rem; font-size:.75rem; }
+  .tbd { width:1.8rem; height:1.8rem; border-radius:50%; border:2px dashed var(--line); flex:none; }
+</style>
+
+{% if rounds %}
+  {% with final=rounds|last %}{% with champ=final.matches.0.winner %}
+    {% if champ %}
+      <div class="champ" style="--team:{{ champ.color }}"><span class="avatar">{{ champ.initials }}</span>🎉 {{ champ.name }} remporte le tournoi ! 🎉</div>
+    {% endif %}
+  {% endwith %}{% endwith %}
+  <p class="muted">👆 Touche l'équipe gagnante de chaque match. Touche-la à nouveau pour annuler.</p>
+  <div class="bracket">
+    {% for r in rounds %}
+      <div class="round"><h3>{{ r.label }}</h3>
+        <div class="ms">
+          {% for m in r.matches %}
+            <form method="post" class="bm {% if m.winner %}decided{% endif %}">{% csrf_token %}
+              <input type="hidden" name="action" value="winner"><input type="hidden" name="match" value="{{ m.pk }}">
+              {% if m.team_a %}
+                <button name="team" value="{{ m.team_a.pk }}" style="--team:{{ m.team_a.color }}" {% if m.winner_id == m.team_a_id %}class="win"{% endif %} {% if not m.team_b %}disabled{% endif %}><span class="avatar">{{ m.team_a.initials }}</span>{{ m.team_a.name }}</button>
+              {% else %}<button disabled><span class="tbd"></span>À venir</button>{% endif %}
+              {% if m.team_b %}
+                <button name="team" value="{{ m.team_b.pk }}" style="--team:{{ m.team_b.color }}" {% if m.winner_id == m.team_b_id %}class="win"{% endif %} {% if not m.team_a %}disabled{% endif %}><span class="avatar">{{ m.team_b.initials }}</span>{{ m.team_b.name }}</button>
+              {% else %}<button disabled><span class="tbd"></span>À venir</button>{% endif %}
+            </form>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <form method="post" onsubmit="return confirm('Effacer le tableau et tous ses résultats ?')" style="text-align:right">{% csrf_token %}
+    <input type="hidden" name="action" value="reset_bracket"><button class="btn ghost">↺ Recommencer le tableau</button>
+  </form>
+{% else %}
+  <div class="card">
+    <h2>🚀 Pour commencer</h2>
+    <ol class="steps">
+      <li class="{% if power_of_two %}done{% endif %}"><span class="n">1</span><span>Crée 2, 4, 8 ou 16 équipes dans l'onglet <a href="{% url 'teams' t.pk %}">Équipes</a> ({{ teams|length }} pour l'instant)</span></li>
+      <li><span class="n">2</span>Lance le tableau : les équipes sont tirées au sort</li>
+    </ol>
+    <form method="post" style="margin-top:1rem">{% csrf_token %}
+      <input type="hidden" name="action" value="start_bracket">
+      <button class="btn block" {% if not power_of_two %}disabled style="opacity:.5;cursor:not-allowed"{% endif %}>🎲 Tirer au sort et lancer le tableau</button>
+    </form>
+  </div>
+{% endif %}

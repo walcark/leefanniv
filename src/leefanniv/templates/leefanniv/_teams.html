@@ -1,0 +1,23 @@
+<div class="card">
+  <h2>👯 Équipes <span class="muted">({{ teams|length }})</span></h2>
+  <form method="post" class="row">{% csrf_token %}
+    <input type="hidden" name="action" value="team">
+    <input type="text" name="name" placeholder="Nom de la nouvelle équipe" required>
+    <button class="btn">Créer</button>
+  </form>
+  <div class="teams">
+    {% for team in teams %}
+      <div class="team" style="--team:{{ team.color }}">
+        <div class="th"><span class="avatar">{{ team.initials }}</span><strong>{{ team.name }}</strong></div>
+        <div class="chips">
+          {% for p in team.players.all %}<span class="chip">{{ p.name }}</span>{% empty %}<span class="muted">Pas encore de joueur</span>{% endfor %}
+        </div>
+        <form method="post" class="row">{% csrf_token %}
+          <input type="hidden" name="action" value="player"><input type="hidden" name="team" value="{{ team.pk }}">
+          <input type="text" name="name" placeholder="Prénom du joueur" required>
+          <button class="btn soft">+ Joueur</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
+</div>

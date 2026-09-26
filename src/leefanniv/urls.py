@@ -9,6 +9,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("tournaments/", views.tournaments, name="tournaments"),
     path("t/<int:pk>/", views.tournament, name="tournament"),
-    path("games/", views.games, name="games"),
+    path("t/<int:pk>/equipes/", views.tournament, {"tab": "teams"}, name="teams"),
+    path("t/<int:pk>/charte/", views.tournament, {"tab": "charter"}, name="charter"),
     path("admin/", admin.site.urls),
 ]

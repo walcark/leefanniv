@@ -2,47 +2,97 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff6f0">
 <title>{% block title %}Leefanniv{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
 <style>
-  :root { --bg:#f6f5f2; --card:#fff; --fg:#1d1d1f; --muted:#6b6b70; --line:#e3e1dc;
-          --accent:#e8590c; --gold:#f2b705; --silver:#a8b0b8; --bronze:#c47a3a;
-          --win:#2b8a3e; --draw:#868e96; --loss:#c92a2a; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#141416; --card:#1e1e22; --fg:#ececef; --muted:#9a9aa2; --line:#2e2e34; }
+  :root {
+    --bg:#fff6f0; --card:#ffffff; --ink:#3b2a40; --muted:#8c7b90; --line:#f1e4ea;
+    --pink:#ff7eb0; --pink-soft:#ffe0ec; --blue:#8fd0ff; --mint:#8fe3bf; --lemon:#ffe38a;
+    --lilac:#c6b3ff; --peach:#ffc49b;
+    --win:#4cc38a; --draw:#f5b83d; --loss:#ff8a8a;
+    --shadow:0 6px 24px rgba(214,120,160,.14);
+    --radius:22px;
   }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg);
-         font:16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  header { display:flex; gap:1rem; align-items:center; flex-wrap:wrap;
-           padding:.75rem 1rem; border-bottom:1px solid var(--line); background:var(--card); }
-  header .brand { font-weight:800; color:var(--accent); text-decoration:none; font-size:1.2rem; }
-  header nav { display:flex; gap:.75rem; margin-left:auto; }
-  a { color:var(--accent); }
-  main { max-width:1100px; margin:0 auto; padding:1rem; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
-          padding:1rem; margin-bottom:1rem; }
-  h1 { margin:.2rem 0 1rem; } h2 { margin:0 0 .75rem; font-size:1.1rem; }
-  input, select, button { font:inherit; padding:.5rem .6rem; border-radius:8px;
-          border:1px solid var(--line); background:var(--bg); color:var(--fg); }
-  button { background:var(--accent); color:#fff; border:0; cursor:pointer; font-weight:600; }
-  button.ghost { background:none; color:var(--muted); padding:.2rem .4rem; }
-  form.row { display:flex; gap:.5rem; flex-wrap:wrap; }
-  form.row input[type=text] { flex:1; min-width:8rem; }
-  table { width:100%; border-collapse:collapse; }
-  th, td { padding:.4rem .3rem; text-align:left; border-bottom:1px solid var(--line); }
-  th { color:var(--muted); font-weight:600; font-size:.85rem; }
-  .num { text-align:right; font-variant-numeric:tabular-nums; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1d1622; --card:#2a2030; --ink:#f6ecf5; --muted:#b3a2b6; --line:#3a2e40;
+            --pink-soft:#4a2a3c; --shadow:0 6px 24px rgba(0,0,0,.35); }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; color:var(--ink); background:var(--bg);
+    background-image:
+      radial-gradient(circle at 8% 12%, #ffd3e4 0 4px, transparent 5px),
+      radial-gradient(circle at 92% 20%, #bfe6ff 0 5px, transparent 6px),
+      radial-gradient(circle at 20% 80%, #c9f2dd 0 4px, transparent 5px),
+      radial-gradient(circle at 75% 65%, #ffeaa8 0 5px, transparent 6px),
+      radial-gradient(circle at 50% 40%, #e0d4ff 0 3px, transparent 4px);
+    background-size:340px 340px; background-attachment:fixed;
+    font:16px/1.45 Nunito, ui-rounded, system-ui, sans-serif; }
+  a { color:inherit; }
+
+  header { position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:.75rem;
+    padding:.7rem 1rem; background:color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter:blur(10px); }
+  .brand { font-weight:900; font-size:1.25rem; text-decoration:none; letter-spacing:-.01em; }
+  .brand span { background:linear-gradient(90deg,var(--pink),var(--lilac),var(--blue));
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  header nav { margin-left:auto; display:flex; gap:.35rem; }
+  header nav a { text-decoration:none; font-weight:700; padding:.4rem .8rem; border-radius:999px; }
+  header nav a.on { background:var(--card); box-shadow:var(--shadow); }
+
+  main { max-width:1320px; margin:0 auto; padding:.5rem 1rem 3rem; }
+  h1 { font-size:1.9rem; font-weight:900; margin:.4rem 0 .2rem; letter-spacing:-.02em; }
+  h2 { font-size:1.1rem; font-weight:800; margin:0 0 .8rem; }
+  .sub { color:var(--muted); margin:0 0 1.2rem; }
   .muted { color:var(--muted); font-size:.9rem; }
-  .msg { padding:.6rem 1rem; border-radius:8px; margin-bottom:1rem; background:var(--card);
-         border-left:4px solid var(--accent); }
+
+  .card { background:var(--card); border-radius:var(--radius); padding:1.1rem; margin-bottom:1rem;
+    box-shadow:var(--shadow); }
+
+  input[type=text], input[type=number], select {
+    font:inherit; padding:.65rem .9rem; border-radius:14px; border:2px solid var(--line);
+    background:var(--bg); color:var(--ink); min-width:0; }
+  input:focus, select:focus { outline:none; border-color:var(--pink); }
+  .btn { font:inherit; font-weight:800; border:0; border-radius:14px; padding:.7rem 1.1rem;
+    background:var(--pink); color:#fff; cursor:pointer; box-shadow:0 4px 12px rgba(255,126,176,.35);
+    text-decoration:none; display:inline-block; }
+  .btn:active { transform:scale(.97); }
+  .btn.block { width:100%; padding:.9rem; font-size:1.05rem; }
+  .btn.soft { background:var(--pink-soft); color:var(--ink); box-shadow:none; }
+  .btn.ghost { background:none; color:var(--muted); box-shadow:none; padding:.3rem .5rem; }
+  .row { display:flex; gap:.5rem; flex-wrap:wrap; }
+  .row > input[type=text] { flex:1; min-width:9rem; }
+
+  .avatar { width:2.4rem; height:2.4rem; border-radius:50%; display:grid; place-items:center;
+    background:var(--team, var(--lilac)); color:#3b2a40; font-weight:900; font-size:.9rem; flex:none; }
+  .chip { display:inline-flex; align-items:center; gap:.3rem; padding:.2rem .65rem; border-radius:999px;
+    font-weight:700; font-size:.88rem;
+    background:color-mix(in srgb, var(--team, var(--lilac)) 45%, var(--card)); color:var(--ink); }
+  .badge { display:inline-block; font-size:.8rem; font-weight:800; padding:.15rem .6rem; border-radius:999px;
+    background:var(--pink-soft); }
+
+  .msg { padding:.75rem 1rem; border-radius:16px; margin:.5rem 0 1rem; font-weight:700;
+    background:var(--card); box-shadow:var(--shadow); border-left:6px solid var(--pink); }
   .msg.error { border-color:var(--loss); } .msg.success { border-color:var(--win); }
+  .errorlist { color:var(--loss); font-weight:700; margin:.5rem 0 0; padding-left:1.2rem; }
+
+  .steps { list-style:none; padding:0; margin:0; display:grid; gap:.5rem; }
+  .steps li { display:flex; align-items:center; gap:.7rem; font-weight:700; }
+  .steps .n { width:1.8rem; height:1.8rem; border-radius:50%; display:grid; place-items:center;
+    background:var(--line); font-weight:900; flex:none; }
+  .steps .done .n { background:var(--mint); }
+  .steps .done { color:var(--muted); text-decoration:line-through; }
 </style>
+{% block style %}{% endblock %}
 </head>
 <body>
 <header>
-  <a class="brand" href="{% url 'home' %}">🏆 Leefanniv</a>
-  <nav><a href="{% url 'tournaments' %}">Tournois</a><a href="{% url 'games' %}">Jeux</a></nav>
+  <a class="brand" href="{% url 'home' %}">🎂 <span>Leefanniv</span></a>
+  <nav>
+    <a href="{% url 'tournaments' %}" {% if request.resolver_match.url_name == 'tournaments' %}class="on"{% endif %}>Compétitions</a>
+  </nav>
 </header>
 <main>
   {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}

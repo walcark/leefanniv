@@ -1,19 +1,49 @@
 {% extends "leefanniv/base.html" %}
-{% block title %}Tournois{% endblock %}
+{% block title %}Compétitions{% endblock %}
+{% block style %}
+<style>
+  .list { display:grid; gap:.8rem; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); margin-bottom:1.5rem; }
+  .comp { display:flex; align-items:center; gap:.9rem; text-decoration:none; margin:0; }
+  .comp .ico { font-size:1.8rem; width:3rem; height:3rem; border-radius:16px; display:grid; place-items:center;
+    background:var(--pink-soft); flex:none; }
+  .comp.bracket .ico { background:color-mix(in srgb, var(--blue) 40%, var(--card)); }
+  .comp strong { display:block; font-size:1.1rem; }
+  .kinds { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin:.8rem 0; }
+  .kinds input { display:none; }
+  .kinds label { display:block; padding:.9rem; border-radius:16px; border:2px solid var(--line);
+    cursor:pointer; font-weight:800; }
+  .kinds label small { display:block; font-weight:600; color:var(--muted); margin-top:.2rem; }
+  .kinds input:checked + label { border-color:var(--pink); background:var(--pink-soft); }
+</style>
+{% endblock %}
 {% block content %}
-<h1>Tournois</h1>
-<div class="card">
-  <h2>Nouveau tournoi</h2>
-  <form method="post" class="row">{% csrf_token %}
-    <input type="text" name="name" placeholder="Nom du tournoi" required>
-    <button>Créer</button>
-  </form>
-  {{ form.errors }}
-</div>
-<div class="card">
+<h1>Compétitions</h1>
+<p class="sub">Choisis une compétition ou crée la tienne.</p>
+
+{% if tournaments %}
+<div class="list">
   {% for t in tournaments %}
-    <p><a href="{% url 'tournament' t.pk %}">{{ t.name }}</a>
-       <span class="muted">· {{ t.created|date:"d/m/Y" }}</span></p>
-  {% empty %}<p class="muted">Aucun tournoi pour l'instant.</p>{% endfor %}
+    <a class="card comp {{ t.kind }}" href="{% url 'tournament' t.pk %}">
+      <span class="ico">{% if t.kind == 'bracket' %}🏆{% else %}🎯{% endif %}</span>
+      <span><strong>{{ t.name }}</strong>
+        <span class="muted">{{ t.get_kind_display }} · {{ t.teams.all|length }} équipes</span></span>
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>✨ Nouvelle compétition</h2>
+  <form method="post">{% csrf_token %}
+    <input type="text" name="name" placeholder="Nom, ex. Anniv de Léa" required style="width:100%">
+    <div class="kinds">
+      <input type="radio" name="kind" id="k-points" value="points" checked>
+      <label for="k-points">🎯 Points<small>Chaque match rapporte des points, on suit un classement.</small></label>
+      <input type="radio" name="kind" id="k-bracket" value="bracket">
+      <label for="k-bracket">🏆 Tableau<small>Élimination directe : quarts, demies, finale.</small></label>
+    </div>
+    <button class="btn block">Créer</button>
+    {{ form.non_field_errors }}{{ form.name.errors }}{{ form.kind.errors }}
+  </form>
 </div>
 {% endblock %}
