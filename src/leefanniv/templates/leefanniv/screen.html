@@ -131,7 +131,11 @@ setInterval(async () => {
   const live = document.getElementById("live");
   try {
     const res = await fetch(location.href, { cache: "no-store" });
-    const next = new DOMParser().parseFromString(await res.text(), "text/html").getElementById("live");
+    const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+    // A deploy that changed the styles needs a full reload, not a swap.
+    const styles = (d) => [...d.querySelectorAll("style")].map((s) => s.textContent).join();
+    if (styles(doc) !== styles(document)) return location.reload();
+    const next = doc.getElementById("live");
     if (next && next.innerHTML !== live.innerHTML) live.replaceWith(next);
     document.body.classList.remove("stale");
   } catch {
